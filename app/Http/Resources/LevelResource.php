@@ -21,6 +21,7 @@ class LevelResource extends JsonResource
             'end_points' => $this->end_points,
             'name' => $this->name,
             'image' => $this->image,
+            'color' => $this->color,
             'relationship' => [
                 'features' => FeatureResource::collection(Feature::whereHas('featureLevel' , fn($query) => 
                     $query->where('level_id' , $this->id)

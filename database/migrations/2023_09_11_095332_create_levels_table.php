@@ -17,6 +17,7 @@ return new class extends Migration
             $table->double('end_points');
             $table->string('name');
             $table->string('image');
+            $table->string('color')->nullable();
             $table->timestamps();
         });
     }

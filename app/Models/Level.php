@@ -23,4 +23,5 @@ class Level extends Model
     public function featureLevel() {
         return $this->hasMany(FeatureLevel::class);
     }
+
 }

@@ -36,9 +36,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::delete('/users/{user}' , [UserController::class , 'destroy']);
     Route::patch('/addPointForUser/{user}' , [UserController::class , 'addPointForUser']);
     Route::post('/addGiftForUser/{user}' , [UserController::class , 'addGiftForUser']);
-    Route::get('/users-with-gifts',  [UserController::class , 'getUsersWithGifts']);
-
-
 
 
     Route::get('/levels' , [LevelController::class , 'index']);

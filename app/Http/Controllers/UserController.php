@@ -83,16 +83,17 @@ class UserController extends Controller
 
         $level = Level::where('start_points' ,'<=' ,$user->points)
         ->where('end_points' ,'>=' , $user->points)->first();
+        if ($level){
+            $levelUser = LevelUser::where('user_id' , $user->id)->orderBy('id' , 'desc')->first();
 
-        $levelUser = LevelUser::where('user_id' , $user->id)->orderBy('id' , 'desc')->first();
-
-        $currentLevel = Level::where('id' , $levelUser->level_id )->first();
-
-        if($level->id !== $currentLevel->id){
-          LevelUser::create([
-            'user_id' => $user->id,
-            'level_id' => $level->id
-          ]);
+            $currentLevel = Level::where('id' , $levelUser->level_id )->first();
+    
+            if($level->id !== $currentLevel->id){
+              LevelUser::create([
+                'user_id' => $user->id,
+                'level_id' => $level->id
+              ]);
+            }
         }
         return UserResource::make($user);
 
@@ -106,6 +107,25 @@ class UserController extends Controller
         ]);
         $gift = Gift::where('id' , $request->gift_id)->first();
 
+        $level = Level::where('start_points' ,'<=' ,$user->points)
+        
+        ->where('end_points' ,'>=' , $user->points)->first();
+        if ($level){
+            $levelUser = LevelUser::where('user_id' , $user->id)->first();
+           // return $levelUser;
+
+            $currentLevel = Level::where('id' , $levelUser->level_id )->first();
+    
+            if($level->id !== $currentLevel->id){
+              LevelUser::create([
+                'user_id' => $user->id,
+                'level_id' => $level->id
+              ]);
+            }
+        }
+
+        $currentLevel = Level::where('id' , $levelUser->level_id )->first();
+
         $user->update([
             'points' => $user->points -  $gift->required_points * $request->quantity
         ]);
@@ -117,12 +137,7 @@ class UserController extends Controller
             'quantity' => $request->quantity
         ]);
 
-        $level = Level::where('start_points' ,'<=' ,$user->points)
-        ->where('end_points' ,'>=' , $user->points)->first();
-
-        $levelUser = LevelUser::where('user_id' , $user->id)->orderBy('id' , 'desc')->first();
-
-        $currentLevel = Level::where('id' , $levelUser->level_id )->first();
+        
 
         if($level->id !== $currentLevel->id){
           LevelUser::create([
@@ -136,9 +151,4 @@ class UserController extends Controller
         ]);
     }
 
-    public function getUsersWithGifts()
-    {
-        $users = User::with('gift')->get();
-        return response()->json($users);
-    }
 }

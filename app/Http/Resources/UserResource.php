@@ -32,10 +32,14 @@ class UserResource extends JsonResource
                 'gifts' => GiftResource::collection(Gift::whereHas('giftUser' , fn($query) => 
                     $query->where('user_id' , $this->id)
                 )->get()),
-                'level' => LevelResource::make(Level::whereHas('levelUser' , fn($query) => 
-                    $query->where('user_id' , $this->id)->orderBy('id' , 'desc')->first()
-                )->first())
+                'level' => LevelResource::collection(Level::whereHas('levelUser' , fn($query) => 
+                     $query->where('user_id' , $this->id)->orderBy('id' , 'desc')
+                 )->get())
             ]
         ];
     }
 }
+// 
+// 'level' => LevelResource::make(Level::whereHas('levelUser' , fn($query) => 
+//                     $query->where('user_id' , $this->id)->orderBy('id' , 'desc')
+//                 )->first())

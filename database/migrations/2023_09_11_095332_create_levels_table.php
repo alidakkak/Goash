@@ -13,7 +13,8 @@ return new class extends Migration
     {
         Schema::create('levels', function (Blueprint $table) {
             $table->id();
-            $table->double('points');
+            $table->double('start_points');
+            $table->double('end_points');
             $table->string('name');
             $table->string('image');
             $table->timestamps();

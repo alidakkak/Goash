@@ -13,8 +13,10 @@ return new class extends Migration
     {
         Schema::create('gift_users', function (Blueprint $table) {
             $table->id();
+            $table->double('rating')->default(0);
             $table->foreignId('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreignId('gift_id')->references('id')->on('gifts')->onDelete('cascade');
+            $table->double('quantity')->default(1);
             $table->timestamps();
         });
     }

@@ -2,7 +2,9 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Gift;
 use App\Models\Level;
+use App\Models\LevelUser;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Auth;
@@ -26,9 +28,14 @@ class UserResource extends JsonResource
             'image' => $this->image,
             'birthday' => $this->birthday,
             'points' => $this->points,
-//            'relationships' => [
-//                'level' => $this->levels()->orderBy('created_at' , 'desc')->first()
-//            ]
+            'relationship' => [
+                'gifts' => GiftResource::collection(Gift::whereHas('giftUser' , fn($query) => 
+                    $query->where('user_id' , $this->id)
+                )->get()),
+                'level' => LevelResource::make(Level::whereHas('levelUser' , fn($query) => 
+                    $query->where('user_id' , $this->id)->orderBy('id' , 'desc')->first()
+                )->first())
+            ]
         ];
     }
 }

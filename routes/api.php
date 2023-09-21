@@ -27,6 +27,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/logout' , [AuthController::class , 'logout']);
 
     Route::get('/profile' , [UserController::class , 'profile']);
+    
     Route::get('/users' , [UserController::class , 'index']);
     Route::post('/users' , [UserController::class , 'store']);
     Route::get('/users/{user}' , [UserController::class , 'show']);
@@ -35,10 +36,13 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::delete('/users/{user}' , [UserController::class , 'destroy']);
     Route::patch('/addPointForUser/{user}' , [UserController::class , 'addPointForUser']);
     Route::post('/addGiftForUser/{user}' , [UserController::class , 'addGiftForUser']);
+    Route::get('/users-with-gifts',  [UserController::class , 'getUsersWithGifts']);
+
 
 
 
     Route::get('/levels' , [LevelController::class , 'index']);
+    Route::get('/getLevelsWithfeatures' , [LevelController::class , 'getLevelsWithFeatures']);
     Route::post('/levels' , [LevelController::class , 'store']);
     Route::get('/levels/{level}' , [LevelController::class , 'show']);
     Route::post('/levels/{level}' , [LevelController::class , 'update']);
@@ -50,6 +54,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/gifts/{gift}' , [GiftController::class , 'show']);
     Route::post('/gifts/{gift}' , [GiftController::class , 'update']);
     Route::delete('/gifts/{gift}' , [GiftController::class , 'destroy']);
+    Route::post('/gifts/{gift}/rate', [GiftController::class , 'rateGift']);
+
 
 
     Route::get('/offers' , [OfferController::class , 'index']);

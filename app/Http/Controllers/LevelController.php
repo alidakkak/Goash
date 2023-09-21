@@ -6,14 +6,15 @@ use App\Http\Requests\StoreLevelRequest;
 use App\Http\Requests\UpdateLevelRequest;
 use App\Http\Requests\UpdateUserRequest;
 use App\Http\Resources\LevelResource;
+use App\Models\Feature;
+use App\Models\FeatureLevel;
 use App\Models\Level;
+use App\Models\LevelUser;
 use Illuminate\Http\Request;
 
 class LevelController extends Controller
-{
-    /**
-     * Display a listing of the resource.
-     */
+{    
+       
     public function index(){
         $levels = Level::all();
         return LevelResource::collection($levels);
@@ -27,9 +28,15 @@ class LevelController extends Controller
         $request->validated($request->all());
 
         $level = Level::create($request->all());
-
+        foreach ($request->feature_ids as $feature_id){
+            FeatureLevel::create([
+                'feature_id' =>  $feature_id,
+                'level_id' => $level->id
+            ]);
+        }
         return LevelResource::make($level);
     }
+
 
     public function update(UpdateLevelRequest $request , Level $level){
         $level->update($request->all());

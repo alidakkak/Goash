@@ -9,4 +9,8 @@ class Feature extends Model
 {
     use HasFactory;
     protected $guarded = ['id'];
+    //feature_levels
+    public function featureLevel() {
+        return $this->hasMany(FeatureLevel::class);
+    }
 }

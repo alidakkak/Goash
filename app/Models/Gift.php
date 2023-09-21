@@ -9,4 +9,10 @@ class Gift extends Model
 {
     use HasFactory;
     protected $guarded = ['id'];
+
+    public function giftUser() {
+        return $this->hasMany(GiftUser::class);
+    }
+
+
 }

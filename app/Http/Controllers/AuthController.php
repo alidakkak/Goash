@@ -18,10 +18,10 @@ class AuthController extends Controller
         $request->validated($request->all());
         $user = User::create($request->all());
 
-//        $userLevel = LevelUser::create([
-//           'user_id' => $user->id,
-//           'level_id' => Level::first()
-//        ]);
+       $userLevel = LevelUser::create([
+          'user_id' => $user->id,
+          'level_id' => Level::first()
+       ]);
 
         $token = $user->createToken('auth_token')->plainTextToken;
 

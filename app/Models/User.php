@@ -22,6 +22,10 @@ class User extends Authenticatable
         return $this->hasMany(LevelUser::class);
     }
 
+    public function userPointHistory() {
+        return $this->hasMany(UserPointHistory::class);
+    }
+
     protected $hidden = [
         'password',
         'remember_token',

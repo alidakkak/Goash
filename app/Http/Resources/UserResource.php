@@ -34,7 +34,14 @@ class UserResource extends JsonResource
                 )->get()),
                 'level' => LevelResource::collection(Level::whereHas('levelUser' , fn($query) => 
                      $query->where('user_id' , $this->id)->orderBy('id' , 'desc')
-                 )->get())
+                 )->get()),
+                 'History' =>  [
+                        'id' => $this->id,
+                        'user_id' => $this->user_id,
+                        'points' =>$this->points,
+                        'change' =>$this->change,
+                        'signal' => $this->signal
+                 ],
             ]
         ];
     }

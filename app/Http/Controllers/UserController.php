@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\AddGiftEvent;
 use App\Http\Requests\UpdateUserImageRequest;
 use App\Http\Requests\UpdateUserRequest;
 use App\Http\Resources\UserResource;
@@ -10,6 +11,7 @@ use App\Models\GiftUser;
 use App\Models\Level;
 use App\Models\LevelUser;
 use App\Models\User;
+use App\Models\UserPointHistory;
 use GuzzleHttp\Promise\Create;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -42,20 +44,6 @@ class UserController extends Controller
         return UserResource::make($user);
     }
 
-    // public function profile(){
-    //     $stillToNextLevel = 0;
-    //     $currentPoint = Auth::user()->points;
-    //     $nextLevel = Level::where('points' , '>' , $currentPoint)->first();
-    //     if($nextLevel){
-    //         $stillToNextLevel = $nextLevel->points - $currentPoint;
-    //     }
-    //     return UserResource::make(Auth::user())
-    //     ->additional([
-    //         'still_to_next_level' => $stillToNextLevel,
-    //         'next_level' => $nextLevel
-    //     ]);
-    // }
-
     public function profile(){
         $stillToNextLevel = 0;
         $currentPoint = Auth::user()->points;
@@ -76,9 +64,16 @@ class UserController extends Controller
         ]);
 
         $points = ($request->total * 10) / 100 ;
-
+        $oldPoints = $user->points;
         $user->update([
             'points' => $points
+        ]);
+
+        UserPointHistory::create([
+            'user_id' => $user->id,
+            'points' => $user->points,
+            'change' => $user->points - $oldPoints,
+            'signal'=> '+'
         ]);
 
         $level = Level::where('start_points' ,'<=' ,$user->points)
@@ -106,16 +101,21 @@ class UserController extends Controller
             'quantity' => 'required|numeric|min:1'
         ]);
         $gift = Gift::where('id' , $request->gift_id)->first();
+        $oldPoints = $user->points;
+
+        UserPointHistory::create([
+            'user_id' => $user->id,
+            'points' => $user->points,
+            'change' => $oldPoints - $user->points,
+            'signal'=> '-'
+        ]);
 
         $level = Level::where('start_points' ,'<=' ,$user->points)
-        
         ->where('end_points' ,'>=' , $user->points)->first();
-        if ($level){
-            $levelUser = LevelUser::where('user_id' , $user->id)->first();
-           // return $levelUser;
+        $levelUser = LevelUser::where('user_id' , $user->id)->first();
+        if ($level){     
+            $currentLevel = Level::where('id' , $levelUser->id)->first();
 
-            $currentLevel = Level::where('id' , $levelUser->level_id )->first();
-    
             if($level->id !== $currentLevel->id){
               LevelUser::create([
                 'user_id' => $user->id,
@@ -123,29 +123,25 @@ class UserController extends Controller
               ]);
             }
         }
+        event(new AddGiftEvent($user->id , $gift));
 
         $currentLevel = Level::where('id' , $levelUser->level_id )->first();
 
         $user->update([
             'points' => $user->points -  $gift->required_points * $request->quantity
         ]);
-
         // TODO add quantity in GiftUser table
         GiftUser::create([
             'user_id' => $user->id,
             'gift_id' => $gift->id,
             'quantity' => $request->quantity
         ]);
-
-        
-
         if($level->id !== $currentLevel->id){
           LevelUser::create([
             'user_id' => $user->id,
             'level_id' => $level->id
           ]);
         }
-
         return response([
             'message' => 'gift add for user successfully'
         ]);

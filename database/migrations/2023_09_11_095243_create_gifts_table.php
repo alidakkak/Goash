@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('image');
             $table->double('required_points');
+            $table->double('average_rating')->default(0);
             $table->timestamps();
         });
     }

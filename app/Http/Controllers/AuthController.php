@@ -23,8 +23,6 @@ class AuthController extends Controller
           'level_id' => Level::first()->id
        ]);
 
-       
-
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return UserResource::make($user)->additional(['token' => $token]);

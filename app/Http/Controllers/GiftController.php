@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreGiftRequest;
 use App\Http\Requests\UpdateGiftRequest;
 use App\Http\Resources\GiftResource;
+use App\Http\Resources\GiftUserResource;
 use App\Models\Gift;
+use App\Models\User;
 use App\Models\GiftUser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -52,17 +54,45 @@ class GiftController extends Controller
         return response()->json(['message' => 'Gift Has Been Deleted Successfully']);
     }
 
-    public function rateGift(Request $request, Gift $gift)
-{
-    $user = Auth::user();
-    $rating = $request->input('rating');
 
-    $userGift = new GiftUser();
-    $userGift->user_id = $user->id;
-    $userGift->gift_id = $gift->id;
-    $userGift->rating = $rating;
-    $userGift->save();
+    public function rateGift(Request $request , GiftUser $userGift){
+        $giftUser = new GiftUser();
+        $currentRating = $request->input('rating');
+       // $user_id = $request->input('user_id');
+    
+        if ($currentRating > 5) {
+            return response()->json(['message' => 'Rating should not exceed 5'], 400);
+        }
+        $userGift ->update([
+            //'user_id' => $user_id,
+           // 'gift_id' => $gift_id,
+            'rating' => $currentRating,
+        ]);
 
-    return response()->json(['message' => 'Rating Successfully']);
-}
+        $averageRating = GiftUser::where('gift_id', $userGift->gift_id)->avg('rating');
+        $gift = Gift::findOrFail($userGift->gift_id);
+        $gift->update([
+            'average_rating' => $averageRating
+        ]);
+    
+        return response()->json(['message' => 'Rating Successfully']);
+    }
+
+
+    public function userNotRate(Request $request) {
+        $user_id = $request->input('user_id');
+    
+        // $gifts = Gift::whereDoesntHave('giftUser', function ($query) use ($user_id) {
+        //     $query->where('user_id', $user_id);
+        // })->get();
+    
+        // return response()->json(['gifts' => $gifts]);
+
+        $giftUser = GiftUser::where('user_id' , $user_id)->where('rating' , 0)->get();
+
+        return GiftUserResource::collection($giftUser);
+    }
+    
+    
+       
 }

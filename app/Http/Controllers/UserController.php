@@ -39,7 +39,7 @@ class UserController extends Controller
     }
 
     public function updateImage(UpdateUserImageRequest $request , User $user){
-//        $request->validated($request->all());
+//      $request->validated($request->all());
         $user->update($request->all());
         return UserResource::make($user);
     }
@@ -95,56 +95,116 @@ class UserController extends Controller
     }
 
 
-    public function addGiftForUser(Request $request , User $user){
-        $request->validate([
-            'gift_id' => ['required' , Rule::exists('gifts' , 'id')],
-            'quantity' => 'required|numeric|min:1'
-        ]);
-        $gift = Gift::where('id' , $request->gift_id)->first();
-        $oldPoints = $user->points;
+    // public function addGiftForUser(Request $request , User $user){
+    //     $request->validate([
+    //         'gift_id' => ['required' , Rule::exists('gifts' , 'id')],
+    //         'quantity' => 'required|numeric|min:1'
+    //     ]);
+    //     $gift = Gift::where('id' , $request->gift_id)->first();
+    //     $oldPoints = $user->points;
 
-        UserPointHistory::create([
-            'user_id' => $user->id,
-            'points' => $user->points,
-            'change' => $oldPoints - $user->points,
-            'signal'=> '-'
-        ]);
+    //     UserPointHistory::create([
+    //         'user_id' => $user->id,
+    //         'points' => $user->points,
+    //         'change' => $oldPoints - $user->points,
+    //         'signal'=> '-'
+    //     ]);
 
-        $level = Level::where('start_points' ,'<=' ,$user->points)
-        ->where('end_points' ,'>=' , $user->points)->first();
-        $levelUser = LevelUser::where('user_id' , $user->id)->first();
-        if ($level){     
-            $currentLevel = Level::where('id' , $levelUser->id)->first();
+    //     $level = Level::where('start_points' ,'<=' ,$user->points)
+    //     ->where('end_points' ,'>=' , $user->points)->first();
 
-            if($level->id !== $currentLevel->id){
-              LevelUser::create([
-                'user_id' => $user->id,
-                'level_id' => $level->id
-              ]);
-            }
-        }
-        event(new AddGiftEvent($user->id , $gift));
+    //     $levelUser = LevelUser::where('user_id' , $user->id)->first();
+ 
+    //         $currentLevel = Level::where('id' , $levelUser->id)->first();
 
-        $currentLevel = Level::where('id' , $levelUser->level_id )->first();
+    //         if($level->id !== $currentLevel->id){
+    //           LevelUser::create([
+    //             'user_id' => $user->id,
+    //             'level_id' => $level->id
+    //           ]);
+    //         }
 
-        $user->update([
-            'points' => $user->points -  $gift->required_points * $request->quantity
-        ]);
-        // TODO add quantity in GiftUser table
-        GiftUser::create([
-            'user_id' => $user->id,
-            'gift_id' => $gift->id,
-            'quantity' => $request->quantity
-        ]);
-        if($level->id !== $currentLevel->id){
-          LevelUser::create([
+    //     event(new AddGiftEvent($user->id , $gift));
+
+    //     $currentLevel = Level::where('id' , $levelUser->level_id )->first();
+
+    //     $user->update([
+    //         'points' => $user->points -  $gift->required_points * $request->quantity
+    //     ]);
+    //     // TODO add quantity in GiftUser table
+    //     GiftUser::create([
+    //         'user_id' => $user->id,
+    //         'gift_id' => $gift->id,
+    //         'quantity' => $request->quantity
+    //     ]);
+    //     if($level->id !== $currentLevel->id){
+    //       LevelUser::create([
+    //         'user_id' => $user->id,
+    //         'level_id' => $level->id
+    //       ]);
+    //     }
+    //     return response([
+    //         'message' => 'gift add for user successfully'
+    //     ]);
+    // }
+
+
+    public function addGiftForUser(Request $request, User $user)
+{
+    $request->validate([
+        'gift_id' => ['required', Rule::exists('gifts', 'id')],
+        'quantity' => 'required|numeric|min:1'
+    ]);
+
+    $gift = Gift::findOrFail($request->gift_id);
+    $oldPoints = $user->points;
+
+    UserPointHistory::create([
+        'user_id' => $user->id,
+        'points' => $user->points,
+        'change' => $oldPoints - $user->points,
+        'signal' => '-'
+    ]);
+
+    $level = Level::where('start_points', '<=', $user->points)
+        ->where('end_points', '>=', $user->points)
+        ->first();
+
+    $levelUser = LevelUser::where('user_id', $user->id)->first();
+
+    if ($level->id !== $levelUser->level_id) {
+        LevelUser::create([
             'user_id' => $user->id,
             'level_id' => $level->id
-          ]);
-        }
-        return response([
-            'message' => 'gift add for user successfully'
         ]);
     }
+
+    event(new AddGiftEvent($user->id, $gift));
+
+    $currentLevel = Level::where('id', $levelUser->level_id)->first();
+
+    $user->update([
+        'points' => $user->points - $gift->required_points * $request->quantity
+    ]);
+
+    // TODO: add quantity in GiftUser table
+    GiftUser::create([
+        'user_id' => $user->id,
+        'gift_id' => $gift->id,
+        'quantity' => $request->quantity
+    ]);
+
+    if ($level->id !== $currentLevel->id) {
+        LevelUser::create([
+            'user_id' => $user->id,
+            'level_id' => $level->id
+        ]);
+    }
+
+    return response([
+        'message' => 'Gift added for user successfully'
+    ]);
+}
+
 
 }

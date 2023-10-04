@@ -24,6 +24,7 @@ Route::post('/signup' , [AuthController::class , 'register']);
 Route::post('/login' , [AuthController::class , 'login']);
 
 Route::middleware(['auth:sanctum'])->group(function () {
+    
     Route::post('/logout' , [AuthController::class , 'logout']);
 
     Route::get('/profile' , [UserController::class , 'profile']);
@@ -51,7 +52,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/gifts/{gift}' , [GiftController::class , 'show']);
     Route::post('/gifts/{gift}' , [GiftController::class , 'update']);
     Route::delete('/gifts/{gift}' , [GiftController::class , 'destroy']);
-    Route::post('/gifts/{gift}/rate', [GiftController::class , 'rateGift']);
+    Route::post('/rate-gift/{userGift}', [GiftController::class , 'rateGift']);
+    Route::post('/user-rated-gifts', [GiftController::class, 'userNotRate']);
 
 
 

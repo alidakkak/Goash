@@ -17,6 +17,7 @@ return new class extends Migration
             $table->foreignId('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreignId('gift_id')->references('id')->on('gifts')->onDelete('cascade');
             $table->double('quantity')->default(1);
+            $table->double('required_points');
             $table->timestamps();
         });
     }

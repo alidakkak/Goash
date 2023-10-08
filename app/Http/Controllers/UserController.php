@@ -17,7 +17,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 
-class UserController extends Controller
+class   UserController extends Controller
 {
     public function index(){
         $users = User::all();
@@ -57,7 +57,7 @@ class UserController extends Controller
             'next_level' => $nextLevel,
         ]);
     }
-    
+
     public function addPointForUser(Request $request , User $user){
         $request->validate([
            'total' => 'required|numeric'
@@ -66,7 +66,7 @@ class UserController extends Controller
         $points = ($request->total * 10) / 100 ;
         $oldPoints = $user->points;
         $user->update([
-            'points' => $points
+            'points' => $points + $oldPoints
         ]);
 
         UserPointHistory::create([
@@ -76,18 +76,33 @@ class UserController extends Controller
             'signal'=> '+'
         ]);
 
-        $level = Level::where('start_points' ,'<=' ,$user->points)
-        ->where('end_points' ,'>=' , $user->points)->first();
-        if ($level){
-            $levelUser = LevelUser::where('user_id' , $user->id)->orderBy('id' , 'desc')->first();
+//        $level = Level::where('start_points' ,'<=' ,$user->points)
+//        ->where('end_points' ,'>=' , $user->points)->first();
+//        if ($level){
+//            $levelUser = LevelUser::where('user_id' , $user->id)->orderBy('id' , 'desc')->first();
+//
+//            $currentLevel = Level::where('id' , $levelUser->level_id )->first();
+//
+//            if($level->id !== $currentLevel->id){
+//              LevelUser::create([
+//                'user_id' => $user->id,
+//                'level_id' => $level->id
+//              ]);
+//            }
+//        }
 
-            $currentLevel = Level::where('id' , $levelUser->level_id )->first();
-    
-            if($level->id !== $currentLevel->id){
-              LevelUser::create([
-                'user_id' => $user->id,
-                'level_id' => $level->id
-              ]);
+        $level = Level::where('start_points', '<=', $user->points)
+            ->where('end_points', '>=', $user->points)
+            ->first();
+
+        $levelUser = LevelUser::where('user_id', $user->id)->latest()->first();
+
+        if ($level) {
+            if ($level->id !== $levelUser->level_id) {
+                LevelUser::create([
+                    'user_id' => $user->id,
+                    'level_id' => $level->id
+                ]);
             }
         }
         return UserResource::make($user);
@@ -114,7 +129,7 @@ class UserController extends Controller
     //     ->where('end_points' ,'>=' , $user->points)->first();
 
     //     $levelUser = LevelUser::where('user_id' , $user->id)->first();
- 
+
     //         $currentLevel = Level::where('id' , $levelUser->id)->first();
 
     //         if($level->id !== $currentLevel->id){
@@ -170,18 +185,18 @@ class UserController extends Controller
         ->where('end_points', '>=', $user->points)
         ->first();
 
-    $levelUser = LevelUser::where('user_id', $user->id)->first();
+    $levelUser = LevelUser::where('user_id', $user->id)->latest()->first();
 
-    if ($level->id !== $levelUser->level_id) {
-        LevelUser::create([
-            'user_id' => $user->id,
-            'level_id' => $level->id
-        ]);
+    if ($level) {
+        if ($level->id !== $levelUser->level_id) {
+            LevelUser::create([
+                'user_id' => $user->id,
+                'level_id' => $level->id
+            ]);
+        }
     }
 
     event(new AddGiftEvent($user->id, $gift));
-
-    $currentLevel = Level::where('id', $levelUser->level_id)->first();
 
     $user->update([
         'points' => $user->points - $gift->required_points * $request->quantity
@@ -191,20 +206,17 @@ class UserController extends Controller
     GiftUser::create([
         'user_id' => $user->id,
         'gift_id' => $gift->id,
-        'quantity' => $request->quantity
+        'quantity' => $request->quantity,
+        'required_points' => $gift->required_points
     ]);
-
-    if ($level->id !== $currentLevel->id) {
-        LevelUser::create([
-            'user_id' => $user->id,
-            'level_id' => $level->id
-        ]);
-    }
 
     return response([
         'message' => 'Gift added for user successfully'
     ]);
 }
-
+        public function getUserGifts(User $user) {
+            $gift = $user->giftUser()->where('required_points', '<=' , $user->points)->with('gift')->get();
+            return $gift;
+        }
 
 }

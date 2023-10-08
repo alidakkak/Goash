@@ -26,6 +26,11 @@ class User extends Authenticatable
         return $this->hasMany(UserPointHistory::class);
     }
 
+    public function gifts()
+    {
+        return $this->hasMany(Gift::class);
+    }
+
     protected $hidden = [
         'password',
         'remember_token',
@@ -40,5 +45,5 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
-    
+
 }

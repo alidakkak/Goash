@@ -59,7 +59,7 @@ class GiftController extends Controller
         $giftUser = new GiftUser();
         $currentRating = $request->input('rating');
        // $user_id = $request->input('user_id');
-    
+
         if ($currentRating > 5) {
             return response()->json(['message' => 'Rating should not exceed 5'], 400);
         }
@@ -74,25 +74,18 @@ class GiftController extends Controller
         $gift->update([
             'average_rating' => $averageRating
         ]);
-    
+
         return response()->json(['message' => 'Rating Successfully']);
     }
 
 
-    public function userNotRate(Request $request) {
-        $user_id = $request->input('user_id');
-    
-        // $gifts = Gift::whereDoesntHave('giftUser', function ($query) use ($user_id) {
-        //     $query->where('user_id', $user_id);
-        // })->get();
-    
-        // return response()->json(['gifts' => $gifts]);
+    public function userNotRate() {
 
-        $giftUser = GiftUser::where('user_id' , $user_id)->where('rating' , 0)->get();
+        $giftUser = GiftUser::where('user_id' , auth()->user()->id)->where('rating' , 0)->get();
 
         return GiftUserResource::collection($giftUser);
     }
-    
-    
-       
+
+
+
 }

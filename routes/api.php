@@ -24,11 +24,11 @@ Route::post('/signup' , [AuthController::class , 'register']);
 Route::post('/login' , [AuthController::class , 'login']);
 
 Route::middleware(['auth:sanctum'])->group(function () {
-    
+
     Route::post('/logout' , [AuthController::class , 'logout']);
 
     Route::get('/profile' , [UserController::class , 'profile']);
-    
+
     Route::get('/users' , [UserController::class , 'index']);
     Route::post('/users' , [UserController::class , 'store']);
     Route::get('/users/{user}' , [UserController::class , 'show']);
@@ -37,6 +37,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::delete('/users/{user}' , [UserController::class , 'destroy']);
     Route::patch('/addPointForUser/{user}' , [UserController::class , 'addPointForUser']);
     Route::post('/addGiftForUser/{user}' , [UserController::class , 'addGiftForUser']);
+    Route::get('/getUserGifts/{user}' , [UserController::class , 'getUserGifts']);
 
 
     Route::get('/levels' , [LevelController::class , 'index']);
@@ -69,5 +70,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/features/{feature}' , [FeatureController::class , 'show']);
     Route::post('/features/{feature}' , [FeatureController::class , 'update']);
     Route::delete('/features/{feature}' , [FeatureController::class , 'destroy']);
+
+
+        Route::get('gethistory', [\App\Http\Controllers\HistoryController::class, 'get']);
 
 });

@@ -76,21 +76,6 @@ class   UserController extends Controller
             'signal'=> '+'
         ]);
 
-//        $level = Level::where('start_points' ,'<=' ,$user->points)
-//        ->where('end_points' ,'>=' , $user->points)->first();
-//        if ($level){
-//            $levelUser = LevelUser::where('user_id' , $user->id)->orderBy('id' , 'desc')->first();
-//
-//            $currentLevel = Level::where('id' , $levelUser->level_id )->first();
-//
-//            if($level->id !== $currentLevel->id){
-//              LevelUser::create([
-//                'user_id' => $user->id,
-//                'level_id' => $level->id
-//              ]);
-//            }
-//        }
-
         $level = Level::where('start_points', '<=', $user->points)
             ->where('end_points', '>=', $user->points)
             ->first();
@@ -104,6 +89,12 @@ class   UserController extends Controller
                     'level_id' => $level->id
                 ]);
             }
+        }else{
+            $latestLevel = Level::latest()->first();
+            LevelUser::create([
+                'user_id' => $user->id,
+                'level_id' => $latestLevel->id
+            ]);
         }
         return UserResource::make($user);
 
@@ -204,6 +195,9 @@ class   UserController extends Controller
                 'quantity' => $request->quantity,
                 'required_points' => $gift->required_points
             ]);
+
+            event(new AddGiftEvent($user->id, $gift));
+
             return response([
                 'message' => 'Gift added for user successfully'
             ]);

@@ -23,9 +23,8 @@ class OfferController extends Controller
     }
 
     public function store(StoreOfferRequest $request){
-        $request->validated($request->all());
+     //   $request->validated($request->all());
         $offer = Offer::create($request->all());
-
         return OfferResource::make($offer);
     }
 

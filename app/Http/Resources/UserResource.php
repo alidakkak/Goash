@@ -29,24 +29,28 @@ class UserResource extends JsonResource
             'birthday' => $this->birthday,
             'points' => $this->points,
             'relationship' => [
-                'gifts' => GiftResource::collection(Gift::whereHas('giftUser' , fn($query) => 
-                    $query->where('user_id' , $this->id)
-                )->get()),
-                'level' => LevelResource::collection(Level::whereHas('levelUser' , fn($query) => 
-                     $query->where('user_id' , $this->id)->orderBy('id' , 'desc')
-                 )->get()),
-                 'History' =>  [
-                        'id' => $this->id,
-                        'user_id' => $this->user_id,
-                        'points' =>$this->points,
-                        'change' =>$this->change,
-                        'signal' => $this->signal
-                 ],
+                'gifts' => GiftResource::collection(Gift::whereHas('giftUser', function($query) {
+                    $query->where('user_id', $this->id);
+                })->get()),
+                'level' => LevelResource::collection(Level::whereHas('levelUser', function($query) {
+                    $query->where('user_id', $this->id)
+                        ->where('start_points', '<=', $this->points)
+                     //   ->where('end_points', '>=', $this->points)
+                        ->orderBy('id', 'desc');
+                })->get()),
+                'History' =>  [
+                    'id' => $this->id,
+                    'user_id' => $this->user_id,
+                    'points' => $this->points,
+                    'change' => $this->change,
+                    'signal' => $this->signal
+                ],
             ]
         ];
     }
+
 }
-// 
-// 'level' => LevelResource::make(Level::whereHas('levelUser' , fn($query) => 
+//
+// 'level' => LevelResource::make(Level::whereHas('levelUser' , fn($query) =>
 //                     $query->where('user_id' , $this->id)->orderBy('id' , 'desc')
 //                 )->first())

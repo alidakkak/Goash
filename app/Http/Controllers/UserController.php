@@ -100,56 +100,6 @@ class   UserController extends Controller
 
     }
 
-//    public function addGiftForUser(Request $request, User $user)
-//{
-//    $request->validate([
-//        'gift_id' => ['required', Rule::exists('gifts', 'id')],
-//        'quantity' => 'required|numeric|min:1'
-//    ]);
-//
-//    $gift = Gift::findOrFail($request->gift_id);
-//    $oldPoints = $user->points;
-//
-//    UserPointHistory::create([
-//        'user_id' => $user->id,
-//        'points' => $user->points,
-//        'change' => $oldPoints - $user->points,
-//        'signal' => '-'
-//    ]);
-//
-//    $level = Level::where('start_points', '<=', $user->points)
-//        ->where('end_points', '>=', $user->points)
-//        ->first();
-//
-//    $levelUser = LevelUser::where('user_id', $user->id)->latest()->first();
-//
-//    if ($level) {
-//        if ($level->id !== $levelUser->level_id) {
-//            LevelUser::create([
-//                'user_id' => $user->id,
-//                'level_id' => $level->id
-//            ]);
-//        }
-//    }
-//
-//    event(new AddGiftEvent($user->id, $gift));
-//
-//    $user->update([
-//        'points' => $user->points - $gift->required_points * $request->quantity
-//    ]);
-//
-//    // TODO: add quantity in GiftUser table
-//    GiftUser::create([
-//        'user_id' => $user->id,
-//        'gift_id' => $gift->id,
-//        'quantity' => $request->quantity,
-//        'required_points' => $gift->required_points
-//    ]);
-//    return response([
-//        'message' => 'Gift added for user successfully'
-//    ]);
-//}
-
     public function addGiftForUser(Request $request, User $user) {
         $gift = Gift::findOrFail($request->gift_id);
         if($user->points >= $gift->required_points) {

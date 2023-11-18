@@ -10,11 +10,12 @@ use App\Models\Feature;
 use App\Models\FeatureLevel;
 use App\Models\Level;
 use App\Models\LevelUser;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class LevelController extends Controller
-{    
-       
+{
+
     public function index(){
         $levels = Level::all();
         return LevelResource::collection($levels);
@@ -25,10 +26,19 @@ class LevelController extends Controller
     }
 
     public function store(StoreLevelRequest $request){
-        $request->validated($request->all());
+        $validatedData = $request->validated();
 
-        $level = Level::create($request->all());
-        foreach ($request->feature_ids as $feature_id){
+        $level = Level::create($validatedData);
+        $users = User::where('points', '>=', $validatedData['start_points'])->get();
+        if($users->isNotEmpty()) {
+            foreach ($users as $user) {
+                LevelUser::create([
+                    'user_id' => $user->id,
+                    'level_id' => $level->id
+                ]);
+            }
+        }
+        foreach ($validatedData['feature_ids'] as $feature_id){
             FeatureLevel::create([
                 'feature_id' =>  $feature_id,
                 'level_id' => $level->id

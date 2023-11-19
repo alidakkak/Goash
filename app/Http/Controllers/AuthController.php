@@ -10,26 +10,41 @@ use App\Models\LevelUser;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
     public function register(StoreUserRequest $request){
-        $request->validated($request->all());
-        $user = User::create($request->all());
+        $validatedData = $request->validated();
+        if (!$validatedData) {
+            return response(['error' => 'Validation failed'], 422);
+        }
 
-        LevelUser::create([
-          'user_id' => $user->id,
-          'level_id' => Level::first()->id
-       ]);
+        DB::beginTransaction();
 
-        $token = $user->createToken('auth_token')->plainTextToken;
+        try {
+            $user = User::create($validatedData);
 
-        return response([
-            'user' => $user,
-            'token' => $token
-        ]);
+            LevelUser::create([
+                'user_id' => $user->id,
+                'level_id' => Level::first()->id
+            ]);
+
+            $token = $user->createToken('auth_token')->plainTextToken;
+
+            DB::commit();
+
+            return response([
+                'user' => $user,
+                'token' => $token
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response(['error' => 'An error occurred while registering'], 500);
+        }
     }
+
 
     public function login(LoginUserRequest $request){
         $request->validated($request->all());

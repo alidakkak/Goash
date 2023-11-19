@@ -29,7 +29,9 @@ class LevelController extends Controller
         $validatedData = $request->validated();
 
         $level = Level::create($validatedData);
-        $users = User::where('points', '>=', $validatedData['start_points'])->get();
+        $users = User::where('points', '>=', $validatedData['start_points'])
+            ->where('user_type', 'user')
+            ->get();
         if($users->isNotEmpty()) {
             foreach ($users as $user) {
                 LevelUser::create([

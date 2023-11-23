@@ -56,6 +56,10 @@ class AuthController extends Controller
         }
 
         $token = $user->createToken('auth_token')->plainTextToken;
+        $user = User::find($user->id);
+        $user->update([
+            'device_key' => $request->device_key
+        ]);
 
         return response([
             'user' => $user,
@@ -64,6 +68,10 @@ class AuthController extends Controller
     }
 
     public function logout(){
+        $user = User::find(auth()->user()->id);
+        $user->update([
+            'device_key' => null
+        ]);
         Auth::user()->currentAccessToken()->delete();
         return response()->json(['message' => 'User Logged out Successfully']);
     }

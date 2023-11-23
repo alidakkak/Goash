@@ -38,13 +38,14 @@ class UserResource extends JsonResource
                      //   ->where('end_points', '>=', $this->points)
                         ->orderBy('id', 'desc');
                 })->get()),
-                'History' =>  [
-                    'id' => $this->id,
-                    'user_id' => $this->user_id,
-                    'points' => $this->points,
-                    'change' => $this->change,
-                    'signal' => $this->signal
-                ],
+                'History' => $this->userPointHistory,
+//                    [
+//                    'id' => $this->id,
+//                    'user_id' => $this->user_id,
+//                    'points' => $this->points,
+//                    'change' => $this->change,
+//                    'signal' => $this->signal
+//                ],
             ]
         ];
     }

@@ -26,6 +26,7 @@ class StoreLevelRequest extends FormRequest
             'end_points' => 'required|numeric|min:0',
             'image' => 'required|image|mimes:jpg,png,jpeg',
             'name' => 'required|string',
+            'color' => 'required|string',
             'feature_ids' => ['required' , 'array'],
             'feature_ids.*' => [Rule::exists('features' , 'id')]
         ];

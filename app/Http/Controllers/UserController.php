@@ -12,6 +12,7 @@ use App\Models\Level;
 use App\Models\LevelUser;
 use App\Models\User;
 use App\Models\UserPointHistory;
+use App\Services\Notifications\NotificationService;
 use GuzzleHttp\Promise\Create;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -96,6 +97,10 @@ class   UserController extends Controller
                 'level_id' => $latestLevel->id
             ]);
         }
+        $device_key = User::where('id', $user->id)->pluck('device_key')->first();
+        $content = "New Points Added To Your Account" . $points;
+        $type = "points";
+        NotificationService::sendNotification($device_key, $content, $type, $points);
         return UserResource::make($user);
 
     }
@@ -109,11 +114,11 @@ class   UserController extends Controller
             ]);
 
             $oldPoints = $user->points;
-
+            $newPoints = $user->points - $gift->required_points;
             UserPointHistory::create([
                 'user_id' => $user->id,
-                'points' => $user->points,
-                'change' => $oldPoints - $user->points,
+                'points' => $newPoints,
+                'change' => $oldPoints - $newPoints,
                 'signal' => '-'
             ]);
 
@@ -132,7 +137,7 @@ class   UserController extends Controller
                 }
             }
 
-            event(new AddGiftEvent($user->id, $gift));
+          //  event(new AddGiftEvent($user->id, $gift));
 
             $user->update([
                 'points' => $user->points - $gift->required_points * $request->quantity
@@ -145,8 +150,11 @@ class   UserController extends Controller
                 'quantity' => $request->quantity,
                 'required_points' => $gift->required_points
             ]);
-
-            event(new AddGiftEvent($user->id, $gift));
+            $device_key = User::where('id', $user->id)->pluck('device_key')->first();
+            $content = "New Gift Added To Your Account" . $gift->name;
+            $type = "gift";
+            NotificationService::sendNotification($device_key, $content, $type,$gift->required_points);
+          //  event(new AddGiftEvent($user->id, $gift));
 
             return response([
                 'message' => 'Gift added for user successfully'

@@ -28,7 +28,8 @@ class StoreUserRequest extends FormRequest
             'password' => 'required|min:7|max:28',
             'phone' => 'required',
             'image' => 'image|mimes:jpg,png,jpeg',
-            'birthday' => 'required|date_format:Y-m-d'
+            'birthday' => 'required|date_format:Y-m-d',
+            'device_key' => 'required'
         ];
     }
 }

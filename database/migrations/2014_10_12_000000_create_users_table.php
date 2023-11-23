@@ -23,6 +23,7 @@ return new class extends Migration
             $table->string('user_type')->default(UserTypes::USER);
             $table->string('email')->unique();
             $table->string('password');
+            $table->string('device_key')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });
